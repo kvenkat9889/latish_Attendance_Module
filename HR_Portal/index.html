@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Table View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gradient-1: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --gradient-2: linear-gradient(45deg, #3b82f6, #2dd4bf);
+            --shadow-color: rgba(99, 102, 241, 0.15);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #fafafa;
+            color: #0f172a;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background: var(--gradient-1);
+            padding: 1rem 2rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: glowText 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-wrapper {
+            display: flex;
+            max-width: 1180px;
+            width: 100%;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 2px 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #6366f1;
+            pointer-events: none;
+        }
+
+        .clear-button {
+            background: red;
+            height: 45px;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 10px var(--shadow-color);
+            margin-left: 15px;
+        }
+
+        .clear-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .employee-table-container {
+            padding: 0rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeScale 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            display: flex;
+            justify-content: center;
+        }
+
+        .employee-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .employee-table th,
+        .employee-table td {
+            padding: 1.25rem;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .employee-table th {
+            background: #3b82f6;
+            color: #ffffff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .employee-table tr {
+            transition: all 0.3s ease;
+        }
+
+        .employee-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .employee-table td {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .employee-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .view-button {
+            background-color: #3b82f6;
+            border: 1px solid #6366f1;
+            cursor: pointer;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .view-button:hover {
+            background-color: #5356eb;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .view-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-in {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: white;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .status-out {
+            background: linear-gradient(135deg, #fb923c, #f97316);
+            color: white;
+        }
+
+        .select-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #6366f1;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .checkbox-cell {
+            padding: 1.25rem 0.5rem;
+            width: 50px;
+        }
+
+        .employee-detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .employee-detail-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .employee-detail-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .employee-detail-overlay.active .employee-detail-card {
+            transform: translateY(0);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .employee-detail-title {
+            color: #1a365d;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: #4a5568;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: #1a365d;
+        }
+
+        .detail-info {
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            color: #4a5568;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: #1a365d;
+            font-size: 1.125rem;
+            font-weight: 500;
+        }
+
+        .time-records {
+            margin-top: 2rem;
+        }
+
+        .time-record {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .time-label {
+            color: #4a5568;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .time-value {
+            color: #1a365d;
+            font-weight: 500;
+        }
+
+        .duration {
+            color: #48bb78;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+            font-size: 1.125rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-left: 450%;
+            width: 100%;
+        }
+
+        .no-records-icon {
+            width: 100px;
+            height: 100px;
+            color: #cbd5e1;
+        }
+
+        @keyframes glowText {
+            0%, 100% {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 5px;
+            border: 2px solid #f1f5f9;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 2rem 1rem;
+                text-align: center;
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+                margin: 0;
+            }
+
+            .search-container {
+                flex-direction: column;
+                gap: 15px;
+                padding: 0 1rem;
+            }
+
+            .search-wrapper {
+                width: 100%;
+            }
+
+            .clear-button {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .employee-table-container {
+                padding: 0 1rem;
+            }
+
+            .employee-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .employee-table th,
+            .employee-table td {
+                padding: 1rem 0.75rem;
+            }
+
+            .checkbox-cell {
+                padding: 1rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-title {
+                font-size: 1.5rem;
+            }
+
+            .search-input,
+            .clear-button {
+                font-size: 0.875rem;
+            }
+
+            .employee-table-container {
+                padding: 0 0.5rem;
+            }
+
+            .employee-table th,
+            .employee-table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.875rem;
+            }
+
+            .checkbox-cell {
+                padding: 0.75rem 0.25rem;
+            }
+
+            .status-badge {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.75rem;
+                min-width: 80px;
+            }
+
+            .view-button {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        .attendance-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background-color: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .status-present {
+            background-color: #d1f5d3;
+            color: #0d6832;
+        }
+
+        .status-half-day {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-absent {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-unknown {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">ADMIN ATTENDANCE</h1>
+    </div>
+    
+    <div class="search-container">
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="Enter Employee ID...">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+        <button class="clear-button" onclick="showModal()">Clear Records</button>
+    </div>
+    
+    <div class="employee-table-container">
+        <table class="employee-table" id="employeeTable">
+            <thead>
+                <tr>
+                    <th class="checkbox-cell"><input type="checkbox" id="selectAll" class="select-checkbox" onclick="toggleSelectAll()"></th>
+                    <th>Employee ID</th>
+                    <th>Status</th>
+                    <th>Attendance</th>
+                    <th>Last Update</th>
+                    <th>Hours Worked</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="employeeTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="employee-detail-overlay" id="employeeDetailOverlay">
+        <div class="employee-detail-card">
+            <div class="detail-header">
+                <h2 class="employee-detail-title">Employee Details</h2>
+                <button class="close-button" onclick="hideEmployeeDetail()">×</button>
+            </div>
+            <div class="detail-info" id="employeeDetailContent"></div>
+        </div>
+    </div>
+
+    <script>
+const API_BASE_URL = 'http://localhost:3000/api';
+
+// Calculate duration between in-time and out-time
+function calculateDuration(inTime, outTime) {
+    if (!inTime || !outTime) return 'N/A';
+
+    const parseTime = (timeStr) => {
+        // Assuming backend returns time in "HH:MM:SS" (24-hour) format
+        const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const adjustedHours = hours % 12 || 12; // Convert 0 to 12 for midnight
+        const time = `${adjustedHours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        let [hrs, mins, secs] = time.split(':').map(Number);
+        if (period === 'PM' && hrs !== 12) hrs += 12;
+        if (period === 'AM' && hrs === 12) hrs = 0;
+        const date = new Date();
+        date.setHours(hrs, mins, secs, 0);
+        return date;
+    };
+
+    try {
+        const inDate = parseTime(inTime);
+        const outDate = parseTime(outTime);
+
+        let diffMs = outDate - inDate;
+
+        if (diffMs < 0) {
+            diffMs += 24 * 60 * 60 * 1000; // Handle overnight shifts
+        }
+
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+
+        if (isNaN(hours) || isNaN(minutes)) return '0h 0m 0s';
+        return hours >= 4 ? `${hours}h ${minutes}m` : 'NaN';
+    } catch (e) {
+        console.error('Error parsing time:', e);
+        return '0h 0m 0s';
+    }
+}
+
+// Format hours worked for view details to always show hours and minutes
+function formatHoursWorkedForDetails(hoursWorked) {
+    if (hoursWorked === 'N/A' || hoursWorked === '0h 0m 0s' || hoursWorked === 'NaN') {
+        return '0h 0m';
+    }
+
+    // Extract hours and minutes using a more robust method
+    const matches = hoursWorked.match(/(\d+)h\s*(\d+)m/);
+    if (matches) {
+        const hours = parseInt(matches[1], 10) || 0;
+        const minutes = parseInt(matches[2], 10) || 0;
+        return `${hours}h ${minutes}m`;
+    }
+
+    // Fallback: try to split and parse manually
+    const parts = hoursWorked.split('h');
+    const hours = parseInt(parts[0], 10) || 0;
+    const minutesPart = parts[1] ? parts[1].replace('m', '').trim() : '0';
+    const minutes = parseInt(minutesPart, 10) || 0;
+
+    return `${hours}h ${minutes}m`;
+}
+
+// Format date to remove zonal time (e.g., "2025-05-12" instead of "2025-05-12T00:00:00.000Z")
+function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr; // Return original if invalid
+    return date.toLocaleDateString('en-CA'); // Returns "YYYY-MM-DD"
+}
+
+// Get day of the week from date string
+function getDayName(dateStr) {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+}
+
+// Get attendance status based on hours worked
+function getAttendanceStatus(hoursWorked) {
+    if (hoursWorked === 'NaN' || hoursWorked === 'N/A' || hoursWorked === '0h 0m 0s') return 'Absent';
+    if (hoursWorked === 'In Progress') return 'Pending';
+    const hours = parseFloat(hoursWorked.split('h ')[0]) || 0;
+    if (hours >= 8) return 'Present';
+    if (hours >= 4) return 'Half-Day';
+    return 'Absent';
+}
+
+// Generate attendance badge HTML
+function getAttendanceBadgeHTML(status) {
+    let badgeClass = '';
+    switch (status.toLowerCase()) {
+        case 'present':
+            badgeClass = 'status-present';
+            break;
+        case 'half-day':
+            badgeClass = 'status-half-day';
+            break;
+        case 'absent':
+            badgeClass = 'status-absent';
+            break;
+        case 'pending':
+            badgeClass = 'status-pending';
+            break;
+        default:
+            badgeClass = 'status-pending';
+    }
+    return `<span class="attendance-badge ${badgeClass}">${status}</span>`;
+}
+
+// Show employee details
+async function showEmployeeDetail(employeeId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/records?employeeId=${employeeId}`);
+        if (!response.ok) throw new Error('Failed to fetch records');
+        const records = await response.json();
+
+        if (records.length === 0) {
+            document.getElementById('employeeDetailContent').innerHTML = `
+                <div class="no-records">
+                    <svg class="no-records-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.95-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    No Records Found
+                </div>
+            `;
+            document.getElementById('employeeDetailOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            return;
+        }
+
+        const dayRecords = new Map();
+        records.forEach(record => {
+            const date = formatDate(record.date);
+            if (!dayRecords.has(date)) {
+                dayRecords.set(date, {
+                    date,
+                    day: getDayName(record.date),
+                    inTime: null,
+                    outTime: null,
+                    hoursWorked: record.hours_worked || null,
+                    attendanceStatus: record.attendance_status || null
+                });
+            }
+            const dayRecord = dayRecords.get(date);
+            if (record.status === 'in') {
+                dayRecord.inTime = record.timestamp;
+            } else if (record.status === 'out') {
+                dayRecord.outTime = record.timestamp;
+            }
+        });
+
+        dayRecords.forEach(record => {
+            if (record.inTime && record.outTime && !record.hoursWorked) {
+                const duration = calculateDuration(record.inTime, record.outTime);
+                record.hoursWorked = duration !== 'N/A' ? duration : '0h 0m 0s';
+                record.attendanceStatus = getAttendanceStatus(duration);
+            } else if (!record.hoursWorked) {
+                record.hoursWorked = '0h 0m 0s';
+                record.attendanceStatus = getAttendanceStatus('N/A');
+            }
+        });
+
+        document.getElementById('employeeDetailContent').innerHTML = `
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="info-label">Employee ID</div>
+                    <div class="info-value">${employeeId}</div>
+                </div>
+            </div>
+            <h3 style="margin: 2rem 0 1rem;">Attendance Records</h3>
+            ${Array.from(dayRecords.values()).reverse().map(record => `
+                <div class="time-record">
+                    <div>
+                        <div class="time-label">Date</div>
+                        <div class="time-value">${record.date}</div>
+                    </div>
+                    <div>
+                        <div class="time-label">Day</div>
+                        <div class="time-value">${record.day}</div>
+                    </div>
+                    <div>
+                        <div class="time-label">Punch In</div>
+                        <div class="time-value">${record.inTime || 'N/A'}</div>
+                    </div>
+                    <div>
+                        <div class="time-label">Punch Out</div>
+                        <div class="time-value">${record.outTime || 'N/A'}</div>
+                    </div>
+                    <div>
+                        <div class="time-label">Hours Worked</div>
+                        <div class="time-value">${formatHoursWorkedForDetails(record.hoursWorked)}</div>
+                    </div>
+                    <div>
+                        <div class="time-label">Attendance</div>
+                        <div class="time-value">${getAttendanceBadgeHTML(record.attendanceStatus)}</div>
+                    </div>
+                </div>
+            `).join('')}
+        `;
+
+        document.getElementById('employeeDetailOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } catch (err) {
+        console.error('Error fetching employee details:', err);
+        alert('Failed to load employee details. Please try again.');
+    }
+}
+
+// Hide employee detail overlay
+function hideEmployeeDetail() {
+    document.getElementById('employeeDetailOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Get latest status for an employee
+async function getLatestEmployeeStatus(employeeId, date) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/records?employeeId=${employeeId}&date=${formatDate(date)}`);
+        if (!response.ok) throw new Error('Failed to fetch records');
+        const records = await response.json();
+
+        if (records.length === 0) return null;
+
+        records.sort((a, b) => {
+            const timeA = new Date(`1970-01-01T${a.timestamp}Z`).getTime();
+            const timeB = new Date(`1970-01-01T${b.timestamp}Z`).getTime();
+            return timeB - timeA;
+        });
+
+        const latestRecord = records[0];
+        const result = {
+            id: employeeId,
+            status: latestRecord.status,
+            lastUpdate: latestRecord.timestamp,
+            date: formatDate(date),
+            hoursWorked: 'In Progress',
+            attendanceStatus: 'Pending'
+        };
+
+        const punchInRecord = records.find(r => r.status === 'in');
+        const punchOutRecord = records.find(r => r.status === 'out');
+
+        if (punchInRecord && punchOutRecord) {
+            const duration = calculateDuration(punchInRecord.timestamp, punchOutRecord.timestamp);
+            result.hoursWorked = duration !== 'N/A' ? duration : '0h 0m 0s';
+            result.attendanceStatus = getAttendanceStatus(duration);
+        } else if (!punchInRecord && !punchOutRecord) {
+            result.hoursWorked = '0h 0m 0s';
+            result.attendanceStatus = 'Absent';
+        }
+
+        return result;
+    } catch (err) {
+        console.error('Error fetching status:', err);
+        return null;
+    }
+}
+
+// Toggle select all checkboxes
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.record-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+// Update employee table
+async function updateEmployeeTable() {
+    const searchQuery = document.getElementById('searchInput').value.trim();
+    const today = new Date().toLocaleDateString('en-CA');
+    const tableBody = document.getElementById('employeeTableBody');
+
+    try {
+        // Construct API URL with employeeId filter if searchQuery exists
+        const url = searchQuery
+            ? `${API_BASE_URL}/records?employeeId=${encodeURIComponent(searchQuery)}`
+            : `${API_BASE_URL}/records`;
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch records');
+        }
+        const records = await response.json();
+
+        // If no records are returned, show "No Records Found"
+        if (records.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="no-records">
+                        <svg class="no-records-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        No Records Found
+                    </td>
+                </tr>
+            `;
+            document.getElementById('selectAll').checked = false;
+            return;
+        }
+
+        // Get unique employee IDs
+        const employeeIds = [...new Set(records.map(record => record.employee_id))];
+        const latestRecords = [];
+
+        // Fetch latest status for each employee
+        for (const id of employeeIds) {
+            const status = await getLatestEmployeeStatus(id, today);
+            if (status) latestRecords.push(status);
+        }
+
+        // Sort records by employee ID for consistency
+        latestRecords.sort((a, b) => a.id.localeCompare(b.id));
+
+        // Render table rows
+        tableBody.innerHTML = latestRecords.map(record => `
+            <tr>
+                <td class="checkbox-cell"><input type="checkbox" class="record-checkbox select-checkbox" data-id="${record.id}"></td>
+                <td>${record.id}</td>
+                <td><span class="status-badge ${record.status === 'in' ? 'status-in' : 'status-out'}">
+                    ${record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                </span></td>
+                <td>${getAttendanceBadgeHTML(record.attendanceStatus)}</td>
+                <td>${record.lastUpdate}</td>
+                <td>${record.hoursWorked}</td>
+                <td>
+                    <button class="view-button" onclick="showEmployeeDetail('${record.id}')">
+                        <svg class="view-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        View
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        // Update select all checkbox
+        const checkboxes = document.querySelectorAll('.record-checkbox');
+        const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
+        document.getElementById('selectAll').checked = allChecked;
+    } catch (err) {
+        console.error('Error updating table:', err);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="no-records">
+                    <svg class="no-records-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    ${err.message || 'Error Loading Records'}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Show modal for clearing records
+function showModal() {
+    const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
+    if (selectedCheckboxes.length === 0) {
+        alert("Please select at least one record to delete.");
+        return;
+    }
+    const confirmClear = confirm(`Are you sure you want to permanently delete ${selectedCheckboxes.length} selected record(s)?`);
+    if (confirmClear) {
+        clearSelectedRecords();
+    }
+}
+
+// Clear selected records
+async function clearSelectedRecords() {
+    const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/records`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeIds: selectedIds })
+        });
+
+        if (!response.ok) throw new Error('Failed to delete records');
+        const data = await response.json();
+        alert(data.message);
+        updateEmployeeTable();
+    } catch (err) {
+        console.error('Error deleting records:', err);
+        alert('Failed to delete records. Please try again.');
+    }
+}
+
+// Event listeners for search input
+const searchInput = document.getElementById('searchInput');
+
+// Prevent non-alphanumeric keys and limit length
+searchInput.addEventListener('keydown', function(e) {
+    // Allow control keys (e.g., Backspace, Delete, Arrow keys)
+    if (e.ctrlKey || e.metaKey || e.key === 'Backspace' || e.key === 'Delete' ||
+        e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
+        return;
+    }
+    // Prevent non-alphanumeric characters
+    if (!/^[a-zA-Z0-9]$/.test(e.key)) {
+        e.preventDefault();
+    }
+    // Prevent input if length is already 7
+    if (this.value.length >= 7 && !e.key.includes('Arrow') && e.key !== 'Backspace' && e.key !== 'Delete') {
+        e.preventDefault();
+    }
+});
+
+// Validate and clean input on change
+searchInput.addEventListener('input', function() {
+    // Keep only alphanumeric characters
+    let cleanedValue = this.value.replace(/[^a-zA-Z0-9]/g, '');
+    // Limit to 7 characters
+    if (cleanedValue.length > 7) {
+        cleanedValue = cleanedValue.slice(0, 7);
+    }
+    this.value = cleanedValue;
+    updateEmployeeTable();
+});
+
+// Other event listeners
+document.getElementById('employeeDetailOverlay').addEventListener('click', function(e) {
+    if (e.target === this) hideEmployeeDetail();
+});
+
+// Initialize table on load
+updateEmployeeTable();
+    </script>
+</body>
+</html>

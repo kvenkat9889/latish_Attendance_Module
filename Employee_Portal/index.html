@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attendance Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f6f8fd 0%, #e9f0ff 100%);
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            background-color: #1b8ce9;
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            opacity: 0;
+            animation: slideInLeft 0.5s ease forwards;
+        }
+
+        .clock-icon {
+            width: 32px;
+            height: 32px;
+            color: #ffffff;
+            animation: rotateIn 1s ease forwards;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .input-group:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-size: 0.875rem;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+
+        .status-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            opacity: 0;
+            animation: slideInRight 0.5s ease forwards 0.4s;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.5rem 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0;
+            animation: pulse 2s infinite;
+        }
+
+        .status-in {
+            background-color: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+
+        .status-out {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: #e53e3e;
+        }
+
+        .button {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1a365d 0%, #2a4365 100%);
+            color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: slideInUp 0.5s ease forwards 0.6s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button:disabled {
+            background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+            cursor: not-allowed;
+        }
+
+        .button:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4p
+x 12px rgba(26, 54, 93, 0.25);
+        }
+
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .button:not(:disabled):active::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(100, 100);
+                opacity: 0;
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes rotateIn {
+            from {
+                transform: rotate(-180deg);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            70% {
+                transform: scale(2);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.25rem;
+            }
+
+            .button {
+                padding: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card-header">
+            <h2 class="card-title">PUNCH-IN/OUT PORTAL</h2>
+            <svg class="clock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+        </div>
+        <div class="input-group">
+            <label class="input-label" for="employeeId">Employee ID</label>
+            <input type="text" id="employeeId" class="input-field" placeholder="Enter your 7-digit ID (ATS0xxx)" maxlength="7">
+        </div>
+        <div class="status-container">
+            <div class="status-row">
+                <span class="status-label">Current Status:</span>
+                <div class="status-badge status-out">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Punched Out</span>
+                </div>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Time:</span>
+                <span class="time">--:--:--</span>
+            </div>
+        </div>
+        <button class="button" id="punchButton" disabled>Punch In</button>
+    </div>
+    <script>
+const employeeIdInput = document.getElementById('employeeId');
+const statusBadge = document.querySelector('.status-badge');
+const statusText = document.querySelector('.status-text');
+const punchButton = document.getElementById('punchButton');
+const timeDisplay = document.querySelector('.time');
+const API_BASE_URL = 'http://localhost:3000/api';
+
+// Validation for Employee ID
+function validateEmployeeId(input) {
+    const employeeIdRegex = /^ATS0(?!000)\d{3}$/;
+    return employeeIdRegex.test(input);
+}
+
+// Update current time display
+function updateTime() {
+    const now = new Date();
+    timeDisplay.textContent = now.toLocaleTimeString();
+}
+
+// Get employee's current status from server
+async function getEmployeeStatus(employeeId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/status/${employeeId}`);
+        if (!response.ok) throw new Error('Failed to fetch status');
+        const data = await response.json();
+        return data.status || 'out';
+    } catch (err) {
+        console.error('Error fetching status:', err);
+        return 'out';
+    }
+}
+
+// Check if employee has completed a punch cycle today
+async function hasCompletedPunchCycleToday(employeeId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/records?employeeId=${employeeId}&date=${new Date().toLocaleDateString('en-CA')}`);
+        if (!response.ok) throw new Error('Failed to fetch records');
+        const records = await response.json();
+
+        if (records.length === 0) return false;
+
+        // Sort records by timestamp in ascending order (oldest to newest)
+        records.sort((a, b) => {
+            const timeA = new Date(`1970-01-01T${a.timestamp}Z`).getTime();
+            const timeB = new Date(`1970-01-01T${b.timestamp}Z`).getTime();
+            return timeA - timeB;
+        });
+
+        // Check for at least one complete in → out cycle
+        let hasPunchIn = false;
+        for (const record of records) {
+            if (record.status === 'in') {
+                hasPunchIn = true;
+            } else if (record.status === 'out' && hasPunchIn) {
+                return true; // Found a complete cycle
+            }
+        }
+        return false;
+    } catch (err) {
+        console.error('Error checking punch cycle:', err);
+        return false;
+    }
+}
+
+// Update UI based on validation and status
+async function updateValidation() {
+    const isIdValid = validateEmployeeId(employeeIdInput.value);
+    if (isIdValid) {
+        const currentStatus = await getEmployeeStatus(employeeIdInput.value);
+        statusBadge.className = `status-badge status-${currentStatus}`;
+        statusText.textContent = `Punched ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
+        punchButton.textContent = `Punch ${currentStatus === 'in' ? 'Out' : 'In'}`;
+        const hasPunchedToday = await hasCompletedPunchCycleToday(employeeIdInput.value);
+        punchButton.disabled = hasPunchedToday && currentStatus === 'out';
+        if (hasPunchedToday && currentStatus === 'out') {
+            statusText.textContent = 'Cycle Complete';
+        }
+    } else {
+        punchButton.disabled = true;
+        statusBadge.className = 'status-badge status-out';
+        statusText.textContent = 'Punched Out';
+        punchButton.textContent = 'Punch In';
+    }
+}
+
+// Handle punch in/out
+async function toggleStatus() {
+    const employeeId = employeeIdInput.value;
+    if (!validateEmployeeId(employeeId)) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/punch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeId })
+        });
+
+        if (!response.ok) throw new Error('Failed to punch');
+        
+        const data = await response.json();
+        
+        statusBadge.className = `status-badge status-${data.status}`;
+        statusText.textContent = `Punched ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}`;
+        punchButton.textContent = `Punch ${data.status === 'in' ? 'Out' : 'In'}`;
+        employeeIdInput.disabled = data.status === 'in';
+        
+        // After punching, immediately recheck cycle status
+        const hasPunchedToday = await hasCompletedPunchCycleToday(employeeId);
+        if (data.status === 'out' && hasPunchedToday) {
+            punchButton.disabled = true;
+            statusText.textContent = 'Cycle Complete';
+        }
+    } catch (err) {
+        console.error('Error punching:', err);
+        alert('Failed to process punch. Please try again.');
+    }
+}
+
+// Restrict input to enforce "ATS0" prefix and digits for the last 3 characters
+employeeIdInput.addEventListener('input', function() {
+    let inputValue = employeeIdInput.value;
+    
+    // Remove spaces and non-alphanumeric characters, then convert to uppercase
+    inputValue = inputValue.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+
+    // Enforce "ATS0" as the first 4 characters
+    if (inputValue.length < 4) {
+        inputValue = "ATS0".slice(0, inputValue.length) + inputValue.slice(inputValue.length);
+    } else {
+        inputValue = "ATS0" + inputValue.slice(4);
+    }
+
+    // If length is more than 4, ensure the last 3 characters are digits
+    if (inputValue.length > 4) {
+        let prefix = inputValue.slice(0, 4); // Should be "ATS0"
+        let suffix = inputValue.slice(4); // The remaining characters
+        // Keep only digits in the suffix
+        suffix = suffix.replace(/[^0-9]/g, '');
+        // Limit suffix to 3 characters
+        if (suffix.length > 3) {
+            suffix = suffix.slice(0, 3);
+        }
+        inputValue = prefix + suffix;
+    }
+
+    // Limit total length to 7 characters
+    if (inputValue.length > 7) {
+        inputValue = inputValue.slice(0, 7);
+    }
+
+    employeeIdInput.value = inputValue;
+    updateValidation();
+});
+
+// Handle punch button click
+punchButton.addEventListener('click', toggleStatus);
+
+// Initialize on page load
+window.addEventListener('load', async () => {
+    updateTime();
+    setInterval(updateTime, 1000);
+    if (employeeIdInput.value) {
+        const currentStatus = await getEmployeeStatus(employeeIdInput.value);
+        statusBadge.className = `status-badge status-${currentStatus}`;
+        statusText.textContent = `Punched ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`;
+        punchButton.textContent = `Punch ${currentStatus === 'in' ? 'Out' : 'In'}`;
+        employeeIdInput.disabled = currentStatus === 'in';
+        const hasPunchedToday = await hasCompletedPunchCycleToday(employeeIdInput.value);
+        if (hasPunchedToday && currentStatus === 'out') {
+            punchButton.disabled = true;
+            statusText.textContent = 'Cycle Complete';
+        }
+    }
+});
+    </script>
+</body>
+</html>
