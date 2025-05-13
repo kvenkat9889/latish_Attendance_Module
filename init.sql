@@ -1,5 +1,3 @@
-CREATE DATABASE employee_attendance;
-
 CREATE TABLE punch_records (
     id SERIAL PRIMARY KEY,
     employee_id VARCHAR(7) NOT NULL,
