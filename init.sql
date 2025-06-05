@@ -1,12 +1,9 @@
-CREATE TABLE punch_records (
+CREATE TABLE IF NOT EXISTS punch_records (
     id SERIAL PRIMARY KEY,
-    employee_id VARCHAR(7) NOT NULL,
-    status VARCHAR(3) NOT NULL CHECK (status IN ('in', 'out')),
-    timestamp VARCHAR(20) NOT NULL,
-    date VARCHAR(20) NOT NULL,
-    hours_worked FLOAT,
-    attendance_status VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    employee_id VARCHAR(80) NOT NULL,
+    status VARCHAR(80) NOT NULL,
+    timestamp TIME NOT NULL,
+    date DATE NOT NULL,
+    hours_worked NUMERIC,
+    attendance_status VARCHAR(90)
 );
-
-CREATE INDEX idx_employee_id_date ON punch_records (employee_id, date);
